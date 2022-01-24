@@ -15,3 +15,77 @@
     including various details such as directors, year of release, and top-billed actors.
     Similar to IMDb.
   </p>
+
+  <h2>Main Features</h2>
+
+  <table>
+    <tr>
+      <th>Request</th>
+      <th>URL</th>
+      <th>HTTP Method</th>
+      <th>Response</th>
+    </tr>
+
+    <tr>
+      <td>Return a list of ALL movies to the user</td>
+      <td>'/movies'</td>
+      <td>GET</td>
+      <td>Returns a JSON list of all movies on file</td>
+    </tr>
+
+    <tr>
+      <td>Return data about a single movie by title to the user</td>
+      <td>'/movies/:title'</td>
+      <td>GET</td>
+      <td>Returns information about a single movie via JSON</td>
+    </tr>
+
+    <tr>
+      <td>Return data about a genre by movie title</td>
+      <td>'/movies/genre/:genreName'</td>
+      <td>GET</td>
+      <td>Returns information/description of specified genre via JSON</td>
+    </tr>
+
+    <tr>
+      <td>Return data about a director (bio, birth year, death year) by name</td>
+      <td>'/movies/directors/:directorName'</td>
+      <td>GET</td>
+      <td>Returns information regarding specified director with JSON</td>
+    </tr>
+
+    <tr>
+      <td>Allow new users to register</td>
+      <td>'/users/:newUser'</td>
+      <td>POST</td>
+      <td>Adds new user to JSON object</td>
+    </tr>
+
+    <tr>
+      <td>Allow users to update their user info (username)</td>
+      <td>'/users/:username'</td>
+      <td>PUT</td>
+      <td>Returns updated username with text message confirmation</td>
+    </tr>
+
+    <tr>
+      <td>Allow users to add a movie to their list of favorites</td>
+      <td>'/users/:username/favorites'</td>
+      <td>PUT</td>
+      <td>Returns text message with confirmation movie added to list</td>
+    </tr>
+
+    <tr>
+      <td>Allow users to remove a movie from their list of favorites</td>
+      <td>'/users/:username/favorites'</td>
+      <td>DELETE</td>
+      <td>Returns a text message confirming that movie has been removed</td>
+    </tr>
+
+    <tr>
+      <td>Allow existing users to deregister</td>
+      <td>'/users/:username'</td>
+      <td>DELETE</td>
+      <td>Returns a text message that user email has been removed</td>
+    </tr>
+  </table>
