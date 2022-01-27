@@ -40,6 +40,9 @@ const express = require('express');
   morgan = require('morgan');
 const app = express();
 
+//morgan
+app.use(morgan("common"));
+
 //GET route at '/movies' that returns a JSON object with data on top movies
 app.get('/movies', (req, res) => {
   res.json(topMovies);
