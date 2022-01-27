@@ -6,7 +6,7 @@ const http = require('http'),
 http.createServer((request, response) => {
   response.writeHead(200, {'Content-Type': 'text/plain'});
     response.end('Hello Node!\n');
-/*
+
   let addr = request.url,
   q = url.parse(addr, true),
   filePath = '';
@@ -33,7 +33,7 @@ http.createServer((request, response) => {
   response.write(data);
   response.end();
   });
-*/
+
 
 //require Express, Morgan middleware
 const express = require('express');
