@@ -8,9 +8,9 @@ const express = require('express');
   morgan = require('morgan');
 const app = express();
 
+//body-parser
 const bodyParser = require('body-parser');
 
-//body-parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true}));
 
@@ -71,7 +71,10 @@ http.createServer((request, response) => {
   });
 });
 
-// ---------------CRUD COMMANDS---------------------------
+//express.static to serve documentation.html from public folder
+app.use(express.static('public'));
+
+// ---------------CRUD REST API COMMANDS---------------------------
 
 //GETs all Movies from Mongoose model
 app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -85,15 +88,11 @@ app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) 
     });
 });
 
-//GET route at '/' returning text response It's movie time!
+//GET route at '/' returning text response
 app.get('/', (req, res) => {
   res.send("It's movie time!");
 });
 
-//express.static to serve documentation.html from public folder
-app.use(express.static('public'));
-
-//code routes for all endpoints in documentation.html table
 //Returns data for a single Movie with Mongoose
 app.get('/movies/:Title', passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.findOne({ Title: req.params.Title })
@@ -132,7 +131,7 @@ app.get('/movies/Directors/:Name', passport.authenticate('jwt', { session: false
 
 //Add a user/ registering initially
 app.post('/users',
-//validation logic for request [first]
+  //validation logic for request [first]
   [
     check('Username', 'Username is required').isLength({ min: 5 }),
     check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
@@ -154,7 +153,7 @@ app.post('/users',
         Users
           .create({
             Username: req.body.Username,
-            Password: hashedPassword, //hash password, not actual password
+            Password: hashedPassword, //hashed password, not actual password
             Email: req.body.Email,
             Birthday: req.body.Birthday
           })
@@ -197,19 +196,21 @@ app.get('/users/:Username', passport.authenticate('jwt', { session: false }), (r
 });
 
 //Update a user's info, by username
-app.put('/users/:Username',
+app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
+  //validation for request:
   [
     check('Username', 'Username is required').isLength({ min: 5 }),
     check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
     check('Password', 'Password is required').not().isEmpty(),
     check('Email', 'Email does not appear to be valid').isEmail()
-  ], passport.authenticate('jwt', { session: false }), (req, res) => {
+  ], (req, res) => {
 
     let errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
+
   let hashedPassword = Users.hashPassword(req.body.Password);
   Users.findOneAndUpdate({ Username: req.params.Username },
   {$set:
@@ -236,7 +237,7 @@ app.put('/users/:Username',
 app.post('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username }, {
     $push: { FavoriteMovies: req.params.MovieID }
-    }, //push used to add a new movie ID into the end of the FavoriteMovies array
+  }, //push user to add a new movie ID into the end of the FavoriteMovies array
     { new: true },
   (err, updatedUser) => {
     if (err) {
@@ -264,15 +265,6 @@ app.delete('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { se
   });
 });
 
-/* app.put('/users/:username/favorites', (req, res) => {
-  res.send(movieTitle + 'has been added to your Favorites list.');
-}); */
-
-/*
-app.delete('/users/:username/favorites', (req, res) => {
-  res.send(movieTitle + 'has been deleted from your favorites.');
-}); */
-
 //Removes a user/ Allows user to deregister
 app.delete('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndRemove({ Username: req.params.Username })
@@ -288,8 +280,6 @@ app.delete('/users/:Username', passport.authenticate('jwt', { session: false }),
       res.status(500).send('Error: ' + err);
     });
 });
-
-
 
 //error-handling function to log all errors to the terminal
 app.use((err, req, res, next) => {
