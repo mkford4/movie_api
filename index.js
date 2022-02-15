@@ -17,6 +17,13 @@ app.use(bodyParser.urlencoded({ extended: true}));
 //morgan
 app.use(morgan("common"));
 
+//CORS
+const cors = require('cors');
+app.use(cors()); // allowing ALL domains to have access
+
+//express validator for server-side validation
+const { check, validationResult } = require('express-validator');
+
 //importing auth.js file, passport module & passportjs
 let auth = require('./auth')(app);
 const passport = require('passport');
@@ -123,8 +130,22 @@ app.get('/movies/Directors/:Name', passport.authenticate('jwt', { session: false
     });
 });
 
-//Add a user
-app.post('/users', (req, res) => {
+//Add a user/ registering initially
+app.post('/users',
+//validation logic for request [first]
+  [
+    check('Username', 'Username is required').isLength({ min: 5 }),
+    check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail()
+  ], (req, res) => {
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+  //hashing password & create profile set up [second]
+  let hashedPassword = Users.hashPassword(req.body.Password); //hashing
   Users.findOne({ Username: req.body.Username })
     .then((user) => {
       if (user) {
@@ -133,7 +154,7 @@ app.post('/users', (req, res) => {
         Users
           .create({
             Username: req.body.Username,
-            Password: req.body.Password,
+            Password: hashedPassword, //hash password, not actual password
             Email: req.body.Email,
             Birthday: req.body.Birthday
           })
@@ -176,12 +197,25 @@ app.get('/users/:Username', passport.authenticate('jwt', { session: false }), (r
 });
 
 //Update a user's info, by username
-app.put('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.put('/users/:Username',
+  [
+    check('Username', 'Username is required').isLength({ min: 5 }),
+    check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail()
+  ], passport.authenticate('jwt', { session: false }), (req, res) => {
+
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+  let hashedPassword = Users.hashPassword(req.body.Password);
   Users.findOneAndUpdate({ Username: req.params.Username },
   {$set:
     {
       Username: req.body.Username,
-      Password: req.body.Password,
+      Password: hashedPassword,
       Email: req.body.Email,
       Birthday: req.body.Birthday
     }
