@@ -5,14 +5,14 @@ const http = require('http'),
 
 //require Express, Morgan middleware
 const express = require('express');
-  morgan = require('morgan');
+morgan = require('morgan');
 const app = express();
 
 //body-parser
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //morgan
 app.use(morgan("common"));
@@ -40,37 +40,37 @@ const Users = Models.User;
 //mongoose.connect('mongodb://localhost:27017/myFlixDB', {useNewUrlParser: true, useUnifiedTopology: true});
 
 //connects myFlixDB on Atlas to Heroku API
-mongoose.connect( process.env.CONNECTION_URI, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 http.createServer((request, response) => {
-  response.writeHead(200, {'Content-Type': 'text/plain'});
-    response.end('Hello Node!\n');
+  response.writeHead(200, { 'Content-Type': 'text/plain' });
+  response.end('Hello Node!\n');
 
   let addr = request.url,
-  q = url.parse(addr, true),
-  filePath = '';
+    q = url.parse(addr, true),
+    filePath = '';
 
   if (q.pathname.includes('documentation')) {
     filePath = (__dirname + '/documenation.html');
-    } else {
+  } else {
     filePath = 'index.html';
   };
 
   fs.appendFile('log.txt', 'URL: ' + addr + '/nTimestamp: ' + newDate() + 'n/n', (err) => {
     if (err) {
       console.log(err);
-      } else {
+    } else {
       console.log('Added to log.');
-      }
-    });
-
-  fs.readFile(filePath, (err,data) => {
-  if (err) {
-    throw err;
     }
-  response.writeHead(200, {'Content-Type' : 'text/html'});
-  response.write(data);
-  response.end();
+  });
+
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      throw err;
+    }
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.write(data);
+    response.end();
   });
 });
 
@@ -80,7 +80,7 @@ app.use(express.static('public'));
 // ---------------CRUD REST API COMMANDS---------------------------
 
 //GETs all Movies from Mongoose model
-app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/movies', /* passport.authenticate('jwt', { session: false }),*/(req, res) => {
   Movies.find()
     .then((movies) => {
       res.status(201).json(movies);
@@ -146,32 +146,32 @@ app.post('/users',
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
-  //hashing password & create profile set up [second]
-  let hashedPassword = Users.hashPassword(req.body.Password); //hashing
-  Users.findOne({ Username: req.body.Username })
-    .then((user) => {
-      if (user) {
-        return res.status(400).send(req.body.Username + 'already exists');
-      } else {
-        Users
-          .create({
-            Username: req.body.Username,
-            Password: hashedPassword, //hashed password, not actual password
-            Email: req.body.Email,
-            Birthday: req.body.Birthday
-          })
-          .then((user) => {res.status(201).json(user) })
-        .catch((error) => {
-          console.error(error);
-          res.status(500).send('Error: ' + error);
-        })
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send('Error: ' + error);
-    });
-});
+    //hashing password & create profile set up [second]
+    let hashedPassword = Users.hashPassword(req.body.Password); //hashing
+    Users.findOne({ Username: req.body.Username })
+      .then((user) => {
+        if (user) {
+          return res.status(400).send(req.body.Username + 'already exists');
+        } else {
+          Users
+            .create({
+              Username: req.body.Username,
+              Password: hashedPassword, //hashed password, not actual password
+              Email: req.body.Email,
+              Birthday: req.body.Birthday
+            })
+            .then((user) => { res.status(201).json(user) })
+            .catch((error) => {
+              console.error(error);
+              res.status(500).send('Error: ' + error);
+            })
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send('Error: ' + error);
+      });
+  });
 
 //Returns a list of ALL users
 app.get('/users', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -187,8 +187,9 @@ app.get('/users', passport.authenticate('jwt', { session: false }), (req, res) =
 
 //Get a user by Username
 app.get('/users/:Username', passport.authenticate('jwt', { session: false }), (req, res) => {
-  Users.findOne({ Username: req.params.Username
-})
+  Users.findOne({
+    Username: req.params.Username
+  })
     .then((user) => {
       res.json(user);
     })
@@ -214,27 +215,28 @@ app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
       return res.status(422).json({ errors: errors.array() });
     }
 
-  let hashedPassword = Users.hashPassword(req.body.Password);
-  Users.findOneAndUpdate({ Username: req.params.Username },
-  {$set:
-    {
-      Username: req.body.Username,
-      Password: hashedPassword,
-      Email: req.body.Email,
-      Birthday: req.body.Birthday
-    }
-  },
-  { new: true }, //This line makes sure that the updated document is returned
-  (err, updatedUser) => {
-    if(err) {
-      console.error(err);
-      res.status(500).send('Error: ' + err);
-    } else {
-      res.json(updatedUser);
-      res.send('Your information has been updated.');
-    }
+    let hashedPassword = Users.hashPassword(req.body.Password);
+    Users.findOneAndUpdate({ Username: req.params.Username },
+      {
+        $set:
+        {
+          Username: req.body.Username,
+          Password: hashedPassword,
+          Email: req.body.Email,
+          Birthday: req.body.Birthday
+        }
+      },
+      { new: true }, //This line makes sure that the updated document is returned
+      (err, updatedUser) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send('Error: ' + err);
+        } else {
+          res.json(updatedUser);
+          res.send('Your information has been updated.');
+        }
+      });
   });
-});
 
 //Add a movie to a user's list of favorites
 app.post('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -242,30 +244,30 @@ app.post('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { sess
     $push: { FavoriteMovies: req.params.MovieID }
   }, //push user to add a new movie ID into the end of the FavoriteMovies array
     { new: true },
-  (err, updatedUser) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error: ' + err);
-    } else {
-      res.json(updatedUser);
-    }
-  });
+    (err, updatedUser) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.json(updatedUser);
+      }
+    });
 });
 
 //Removes a movie from a FavoriteMovies list for users
 app.delete('/users/:Username/movies/:MovieID', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username }, {
     $pull: { FavoriteMovies: req.params.MovieID }
-    },
+  },
     { new: true },
-  (err, updatedUser) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error: ' + err);
-    } else {
-      res.json(updatedUser);
-    }
-  });
+    (err, updatedUser) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.json(updatedUser);
+      }
+    });
 });
 
 //Removes a user/ Allows user to deregister
