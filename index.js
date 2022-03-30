@@ -80,7 +80,7 @@ app.use(express.static('public'));
 // ---------------CRUD REST API COMMANDS---------------------------
 
 //GETs all Movies from Mongoose model
-app.get('/movies', /* passport.authenticate('jwt', { session: false }),*/(req, res) => {
+app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.find()
     .then((movies) => {
       res.status(201).json(movies);
