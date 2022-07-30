@@ -293,9 +293,11 @@ app.put('/users/:Username', passport.authenticate('jwt', { session: false }),
 app.get('/users/:Username/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
   Users.findOne({ Username: req.params.Username })
     .then((user) => {
-      res.status(200).json(user.FavoriteMovies);
-    } else {
-      res.status(400).send('Could not find favorite movies for this user');
+      if (user) {
+        res.status(200).json(user.FavoriteMovies);
+      } else {
+        res.status(400).send('Could not find favorite movies for this user');
+      }
     })
     .catch((err) => {
       console.error(err);
